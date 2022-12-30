@@ -1,0 +1,22 @@
+include:
+  - local: 'config-ci/backend.gitlab-ci.yml'
+  - local: 'config-ci/frontend.gitlab-ci.yml'
+  - template: Security/SAST.gitlab-ci.yml
+
+stages:
+  - build
+  - release
+  - notify
+  - test
+
+spotbugs-sast:
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository # не забудьте при сборке также указывать эту папку через аргумент -Dmaven.repo.local 
+
+
+cache:
+  paths:
+    - ${CI_PROJECT_DIR}/.m2/repository # для хранения зависимостей бэкенда
+    - .npm/ # для хранения зависимостей сборки фронтенда
