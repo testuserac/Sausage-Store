@@ -1,0 +1,14 @@
+[Unit]
+Description=store                                                                                                     
+
+[Service]
+Environment=LOG_PATH=/logs/
+Environment=REPORT_PATH=/var/www-data/htdocs/
+ExecStart=http-server /var/www-data/dist/frontend/ -p 443 --proxy http://localhost:8080
+StandardOutput=append:/logs/out-front.log
+Restart=always                                                                                                        
+User=front-user                                                 
+Type=simple                                                                                                           
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,22 +1,23 @@
-include:
-  - local: 'config-ci/backend.gitlab-ci.yml'
-  - local: 'config-ci/frontend.gitlab-ci.yml'
-  - template: Security/SAST.gitlab-ci.yml
-
 stages:
-  - build
-  - release
-  - notify
-  - test
+  - module-pipelines
 
-spotbugs-sast:
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository # не забудьте при сборке также указывать эту папку через аргумент -Dmaven.repo.local 
+frontend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - "/frontend/.gitlab-ci.yml"
+    strategy: depend # depend нужен, если какой-нибудь дочерний пайплайн свалился, мы знали, что общий пайплайн тоже идёт с ошибкой
+  only:
+    changes: # как только происходит изменение в папке frontend, запускается дочерний пайплайн, который лежит в этой папке
+      - frontend/**/*
 
+backend:
+  stage: module-pipelines
+  trigger:
+    include:
+      - "/backend/.gitlab-ci.yml"
+    strategy: depend
+  only:
+    changes:  # как только происходит изменение в папке backend, запускается дочерний пайплайн, который лежит в этой папке
+      - backend/**/*
 
-cache:
-  paths:
-    - ${CI_PROJECT_DIR}/.m2/repository # для хранения зависимостей бэкенда
-    - .npm/ # для хранения зависимостей сборки фронтенда

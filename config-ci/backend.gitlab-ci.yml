@@ -18,15 +18,6 @@ build-backend-code-job:
       - backend/target/sausage-store-${VERSION}.jar
       - ${CI_PROJECT_DIR}/.m2/
 
-slack-notification-backend:
-  stage: notify
-  script:
-      - 'curl -X POST -H "Content-type: application/json" 
-      -d " { \"message\": \"$message_beck [ссылке]($download_link_beck)\" } " $pachka_bot'
-  needs:    
-    - build-backend-code-job
-
-
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16 # тот самый docker-образ, о котором мы все узнаем в будущем
@@ -45,17 +36,21 @@ sonarqube-backend-sast:
   needs:
      - build-backend-code-job
 
-
-stages:
-  - release
-
 upload-backend-release:
   stage: release
   only:
     changes:
       - backend/*
   needs:
-    - build-backend-code-job
+    - sonarqube-backend-sast
   script:
     - cd backend
     - mvn -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository -s settings.xml -Dversion.application=${VERSION} -DskipTests deploy       
+
+slack-notification-backend:
+  stage: notify
+  script:
+      - 'curl -X POST -H "Content-type: application/json" 
+       -d " { \"message\": \"$message_beck [ссылке]($download_link_beck)\" } " $pachka_bot'
+  needs:
+    - upload-backend-release

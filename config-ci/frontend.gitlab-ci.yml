@@ -19,15 +19,6 @@ build-frontend-code-job:
     paths:
       - frontend/dist/frontend 
 
-
-slack-notification-frontend:
-  stage: notify
-  script:
-    - 'curl -X POST -H "Content-type: application/json"
-     -d " { \"message\": \"$message [ссылке]($download_link)\" } " $pachka_bot'
-  needs:
-    - build-frontend-code-job
-
 sonarqube-frontend-sast:
  stage: test
  image: sonarsource/sonar-scanner-cli:latest # тот самый docker-образ, о котором мы все узнаем в будущем
@@ -47,15 +38,22 @@ sonarqube-frontend-sast:
  needs:
     - job: build-frontend-code-job
 
-
 upload-frontend-release:
   stage: release
   only:
     changes:
     - frontend/*
   needs:
-    - build-frontend-code-job
+    - sonarqube-frontend-sast
   script:
     - cd frontend/dist
     - tar czvf sausage-store-${VERSION}.tar.gz frontend
     - curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz ${NEXUS_REPO_URL}/sausage-store-saprykin-daniil-frontend/sausage-store/${VERSION}/sausage-store-${VERSION}.tar.gz      
+
+slack-notification-frontend:
+  stage: notify
+  script:
+    - 'curl -X POST -H "Content-type: application/json"
+     -d " { \"message\": \"$message [ссылке]($download_link)\" } " $pachka_bot'
+  needs:
+    - upload-frontend-release
