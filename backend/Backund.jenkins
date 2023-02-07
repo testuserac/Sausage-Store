@@ -9,12 +9,16 @@ pipeline {
         maven 'maven-3.8.1' // Для сборки бэкенда нужен Maven
         jdk 'JDK16' // И Java Developer Kit нужной версии
     }
+ 
+    environment { 
+        VERSION = ${env.BULD_NUMDER}
+    }
 
     stages {
         stage('Build & Test backend') {
             steps {
                 dir("backend") { // Переходим в папку backend
-                    sh 'mvn package' // Собираем мавеном бэкенд
+                    sh 'mvn package -Dversion.application=${VERSION}' // Собираем мавеном бэкенд
                 }
             }
 
@@ -27,7 +31,7 @@ pipeline {
         
         stage('Save artifacts') {
             steps {
-                archiveArtifacts(artifacts: 'backend/target/sausage-store-0.0.1-SNAPSHOT.jar') // Сохраняем артифакт
+                archiveArtifacts(artifacts: 'backend/target/sausage-store-${env.BULD_NUMDER}.jar') // Сохраняем артифакт
             }
         }
     }
