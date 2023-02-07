@@ -31,7 +31,7 @@ pipeline {
         
         stage('Save artifacts') {
             steps {
-                archiveArtifacts(artifacts: 'backend/target/sausage-store-${env.VERSION}.jar') // Сохраняем артифакт
+                archiveArtifacts(artifacts: 'backend/target/sausage-store-${VERSION}.jar') // Сохраняем артифакт
             }
         }
     }
