@@ -13,6 +13,7 @@ pipeline {
     environment { 
         VERSION = "${env.BUILD_NUMBER}"
     }
+    
 
     stages {
         stage('Build & Test backend') {
@@ -31,7 +32,7 @@ pipeline {
         
         stage('Save artifacts') {
             steps {
-                archiveArtifacts(artifacts: 'backend/target/sausage-store-${VERSION}.jar') // Сохраняем артифакт
+                archiveArtifacts(artifacts: "backend/target/sausage-store-${VERSION}.jar") // Сохраняем артифакт
             }
         }
     }
